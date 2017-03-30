@@ -20,32 +20,39 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+public class MainActivity extends AppCompatActivity
+        implements GoogleApiClient.ConnectionCallbacks,
+                   GoogleApiClient.OnConnectionFailedListener,
+                   LocationListener {
     private static final String TAG = MainActivity.class.getName();
-
-    private static int INTERVAL = 10000;
-    private static int FAST_INTERVAL = 5000;
-    private static final int RC_LOCATION_PERMISION= 100;
-
-    private GoogleApiClient mGoogleApiClient;
-    private boolean mRequestingLocationUpdates = false;
-    private LocationRequest mLocationRequest;
-    private Location mCurrentLocation;
 
     private TextView mTvLatitud;
     private TextView mTvLongitud;
+
+    private static final int RC_LOCATION_PERMISION= 100;
+
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private static int INTERVAL = 10000;
+    private static int FAST_INTERVAL = 5000;
+
+    private boolean mRequestingLocationUpdates = false;
+    private Location mCurrentLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Conectar el UI con la Actividad
         mTvLatitud = (TextView) findViewById(R.id.latitud);
         mTvLongitud= (TextView) findViewById(R.id.longitud);
+
+        //Solicitar permisos si es necesario (Android 6.0+)
+        requestPermissionIfNeedIt();
+
+        //Inicializar el GoogleAPIClient y armar la Petición de Ubicación
         initGoogleAPIClient();
-        isPermissionRequested();
     }
 
     @Override
@@ -111,13 +118,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-    private boolean isPermissionRequested() {
+    private void requestPermissionIfNeedIt() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, RC_LOCATION_PERMISION);
-            return true;
         }
-        return false;
     }
 
     private void refreshUI(){
@@ -135,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startLocationUpdates();
             } else {
-                isPermissionRequested();
+                requestPermissionIfNeedIt();
             }
         }
     }
